@@ -70,7 +70,7 @@ FORMAT = ihex
 
 
 # Target file name (without extension).
-TARGET = test
+TARGET = adctest
 
 
 # Object files directory
