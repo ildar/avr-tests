@@ -14,6 +14,8 @@
 #define LEDDDRPIN DDB5
 
 #define ADCPORT 3
+#define READ_DELAY 3 /* in ms */
+
 
 #include "uart.h"
 
@@ -46,6 +48,7 @@ int main(void)
 			while (ADCSRA & (1<<ADSC)); // wait for conversion to complete
 			adc_value = ADCW & 0x3FF;
 			buf[i] = (unsigned char) (adc_value >> 2);
+			_delay_ms(READ_DELAY);
 		}
 		LEDPORT|= (1<<LEDOUT); // led on, pin=1
 		uart0_init( UART_BAUD_SELECT(57600,F_CPU) );
