@@ -23,31 +23,31 @@ void delay_ms(unsigned int xms)
 
 int main(void)
 {
-	unsigned int adc_value;
-	char buf[16];
+	unsigned int adc_value, buf_size=2048;
+	unsigned char* buf;
 
-	/* enable pin as output */
-	LEDDDR|= (1<<LEDDDRPIN);
+	LEDDDR|= (1<<LEDDDRPIN); // enable pin as output
 	ADCSRA = (1<<ADEN) | (1<<ADPS2) | (1<<ADPS0); // start ADC
 	ADMUX = ADCPORT | (1<<REFS0);
 
-	uart0_init( UART_BAUD_SELECT(57600,F_CPU) );
-	sei();
-
-	LEDPORT|= (1<<LEDOUT); // led on, pin=1
-	uart0_puts( "Hello, UART user!\r\n" );
-	uart0_puts( "--\r\n" );
-	LEDPORT &= ~(1<<LEDOUT); // led off, pin=0
+	while ( ! (buf=malloc(buf_size)) ) buf_size -= 64;
 
 	while (1) {
-		ADCSRA |= (1<<ADSC); // Start conversion
-		while (ADCSRA & (1<<ADSC)); // wait for conversion to complete
-		adc_value = ADCW & 0x3FF;
+		cli();
+		for(unsigned int i=0; i<buf_size; i++) {
+			ADCSRA |= (1<<ADSC); // Start conversion
+			while (ADCSRA & (1<<ADSC)); // wait for conversion to complete
+			adc_value = ADCW & 0x3FF;
+			buf[i] = (unsigned char) adc_value >> 2; // FIXME opt.
+		}
 		LEDPORT|= (1<<LEDOUT); // led on, pin=1
-		uart0_puts(utoa(adc_value, buf, 10));
-		uart0_puts(" \r\n");
+		uart0_init( UART_BAUD_SELECT(57600,F_CPU) );
+		sei();
+		uart0_puts( "\r\nstart_ADC_data\r\n" );
+		for(unsigned int i=0; i<buf_size; i++)
+			uart0_putc(buf[i]);
+		uart0_puts( "\r\nend_ADC_data\r\n" );
 		LEDPORT &= ~(1<<LEDOUT); // led off, pin=0
-		delay_ms(500);
 	}
 	return 0; /* never reached */
 }
