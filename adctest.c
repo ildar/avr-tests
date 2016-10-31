@@ -45,7 +45,7 @@ int main(void)
 			ADCSRA |= (1<<ADSC); // Start conversion
 			while (ADCSRA & (1<<ADSC)); // wait for conversion to complete
 			adc_value = ADCW & 0x3FF;
-			buf[i] = (unsigned char) adc_value >> 2; // FIXME opt.
+			buf[i] = (unsigned char) (adc_value >> 2);
 		}
 		LEDPORT|= (1<<LEDOUT); // led on, pin=1
 		uart0_init( UART_BAUD_SELECT(57600,F_CPU) );
