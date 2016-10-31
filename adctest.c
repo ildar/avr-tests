@@ -37,7 +37,7 @@ int main(void)
 	ADMUX = ADCPORT | (1<<REFS0);
 
 	while ( ! (buf=malloc(buf_size)) ) buf_size -= 64;
-	utoa(buf_size, buf_size_s, sizeof(buf_size_s));
+	utoa(buf_size, buf_size_s, 10);
 
 	while (1) {
 		cli();
