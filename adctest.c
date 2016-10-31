@@ -1,3 +1,8 @@
+/* The app dumps ADC data to serial port at speed (see below at uart0_init)
+   To save the data (1) set serial port to the speed above
+   (2) cat /dev/ttyUSB0 > /tmp/ttyUSB0.out
+*/
+
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
 #include <util/delay.h>
@@ -25,12 +30,14 @@ int main(void)
 {
 	unsigned int adc_value, buf_size=2048;
 	unsigned char* buf;
+	char buf_size_s[8];
 
 	LEDDDR|= (1<<LEDDDRPIN); // enable pin as output
 	ADCSRA = (1<<ADEN) | (1<<ADPS2) | (1<<ADPS0); // start ADC
 	ADMUX = ADCPORT | (1<<REFS0);
 
 	while ( ! (buf=malloc(buf_size)) ) buf_size -= 64;
+	utoa(buf_size, buf_size_s, sizeof(buf_size_s));
 
 	while (1) {
 		cli();
@@ -46,7 +53,10 @@ int main(void)
 		uart0_puts( "\r\nstart_ADC_data\r\n" );
 		for(unsigned int i=0; i<buf_size; i++)
 			uart0_putc(buf[i]);
-		uart0_puts( "\r\nend_ADC_data\r\n" );
+		uart0_puts( "\r\nend_ADC_data, size=" );
+		uart0_puts( buf_size_s );
+		uart0_puts( "\r\n" );
+		delay_ms(40);
 		LEDPORT &= ~(1<<LEDOUT); // led off, pin=0
 	}
 	return 0; /* never reached */
